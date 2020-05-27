@@ -12,15 +12,23 @@ SERVER_ADDRESS = ('localhost', 11000)
 def get_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server.bind(SERVER_ADDRESS)
+    server.settimeout(0)    
     logging.info("Starting server...")
     return server
 
 
 def handle(server, offset):
-    data, addr = server.recvfrom(1024)
-    packet = ntp.Packet().unpack(data)
-    print(packet.to_display())
-    logging.info("Request from {}:{}".format(addr[0], addr[1]))
+    try:
+        data, addr = server.recvfrom(1024)
+        logging.info("Request from {}:{}".format(addr[0], addr[1]))
+
+        packet = ntp.Packet().unpack(data)
+        packet.receive = time.time() + offset
+        packet.transmit = time.time() + offset
+
+        server.sendto(packet.pack(), addr)
+    except OSError:
+        pass
 
 
 if __name__ == '__main__':
