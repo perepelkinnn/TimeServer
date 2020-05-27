@@ -1,16 +1,16 @@
+import ntp
+import time
 import socket
 
-SERVER_ADDRESS = ('localhost', 123)
 
-socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
- 
-data = b"request"
-socket.sendto(data, SERVER_ADDRESS)
+SERVER_ADDRESS = ('localhost', 11000)
+CLIENT_ADDRESS = ('localhost', 11001)
 
 
-data = socket.recvfrom(1024)
-print(data)
+client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+client.bind(CLIENT_ADDRESS)
 
+packet = ntp.Packet(originate=time.time()).pack()
 
-socket.close()
+client.sendto(packet, SERVER_ADDRESS)
+client.close()
